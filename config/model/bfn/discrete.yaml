@@ -1,0 +1,9 @@
+defaults:
+  - schedule: default
+  - _self_
+
+_target_: igcraft.bfn.bfn.DiscreteBFN
+variables_shape:
+  - 291  # default length of padded VH + VL
+
+num_classes: 21  # 20 amino acids + gaps

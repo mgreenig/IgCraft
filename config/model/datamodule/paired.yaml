@@ -1,0 +1,32 @@
+defaults:
+  - vh_tokenizer: defaults
+  - vl_tokenizer: defaults
+  - _self_
+
+_target_: igcraft.model.datamodule.PairedSequenceDatamodule
+
+cfg:
+  _target_: igcraft.model.config.PairedSequenceDatamoduleConfig
+
+  batch_size: 128
+  num_workers: 4
+
+  vh_colnames: [
+    "fwr1_aa_heavy",
+    "cdr1_aa_heavy",
+    "fwr2_aa_heavy",
+    "cdr2_aa_heavy",
+    "fwr3_aa_heavy",
+    "cdr3_aa_heavy",
+    "fwr4_aa_heavy"
+  ]
+
+  vl_colnames: [
+    "fwr1_aa_light",
+    "cdr1_aa_light",
+    "fwr2_aa_light",
+    "cdr2_aa_light",
+    "fwr3_aa_light",
+    "cdr3_aa_light",
+    "fwr4_aa_light"
+  ]

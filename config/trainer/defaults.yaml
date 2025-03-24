@@ -1,0 +1,29 @@
+## Default values for the pytorch lightning trainer. It is assumed that the keys ##
+## run_name and project are defined in the config file that includes this file.  ##
+
+_target_: pytorch_lightning.Trainer
+
+accelerator: "auto"
+devices: "auto"
+precision: "16-mixed"
+gradient_clip_val: 1.0
+enable_progress_bar: false
+log_every_n_steps: 5
+
+val_check_interval: 1000  # validation every 1000 steps
+limit_val_batches: 10  # limit validation to 10 batches
+
+strategy:
+  _target_: pytorch_lightning.strategies.DDPStrategy
+  find_unused_parameters: true
+
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+
+callbacks:
+  - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: "val_loss"
+    mode: "min"
+    save_top_k: 3
+    dirpath: "${hydra:run.dir}/checkpoints"
+    save_last: true

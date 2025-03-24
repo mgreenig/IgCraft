@@ -1,0 +1,63 @@
+# CSV file containing the sequences of all IMGT regions
+sequences_csv: "data/paired_test_holdout.csv"
+
+run_name: "inpainting"
+
+checkpoint:
+  config_path: "igcraft_model/.hydra/config.yaml"
+  checkpoint_path: "igcraft_model/checkpoints/final.ckpt"
+  reset_optimizer: false
+
+# Regions to inpaint
+regions:
+  - H-fwr1
+  - H-cdr1
+  - H-fwr2
+  - H-cdr2
+  - H-fwr3
+  - H-cdr3
+  - H-fwr4
+  - [cdr1, cdr2, cdr3]
+  - [fwr1, fwr2, fwr3, fwr4]
+  - [H-cdr1, H-cdr2, H-cdr3]
+  - [H-fwr1, H-fwr2, H-fwr3, H-fwr4]
+  - [L-cdr1, L-cdr2, L-cdr3]
+  - [L-fwr1, L-fwr2, L-fwr3, L-fwr4]
+
+batch_size: 32
+fix_length: true
+progress_bar: false
+seed: 42
+out_dir: ${hydra:run.dir}
+device: "cuda"
+
+hydra:
+  run:
+    dir: ${run_name}-${now:%Y-%m-%d-%H-%M-%S}
+
+sampler:
+  _target_: igcraft.model.model.PairedSequenceBFNSampler
+
+  vh_len: ${sum:${model.datamodule.vh_tokenizer.region_lengths.fwr1},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr1},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr2},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr2},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr3},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr3},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr4}}
+
+  num_steps: 20
+  num_particles: 32
+  temperature: 0.1
+
+  solver:
+    _target_: igcraft.bfn.bfn.DiscreteBFNSDESolver
+    noise_scale: 1.0
+
+## Add fields below to override or add to the existing model config in the checkpoint ##
+model:
+  cfg:
+  
+    # override the VH/VL pre-trained weights since those should no longer be loaded
+    vh_ckpt_path: null
+    vl_ckpt_path: null

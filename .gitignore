@@ -1,0 +1,8 @@
+build/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+
+.idea
+.ipynb_checkpoints
+.DS_Store

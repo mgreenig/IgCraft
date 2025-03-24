@@ -1,0 +1,59 @@
+defaults:
+  - trainer: defaults
+  - model: paired_bfn
+  - _self_
+
+wandb:
+  entity: null
+  project: null
+  run_name: "finetune_paired_bfn"
+  tags: null
+
+checkpoint:
+  config_path: "igcraft_model/paired/.hydra/config.yaml"
+  checkpoint_path: "igcraft_model/paired/checkpoints/epoch=61-step=179955.ckpt"
+  reset_optimizer: true
+
+trainer:
+  max_epochs: 250
+  limit_val_batches: null
+  val_check_interval: null  
+
+hydra:
+  run:
+    dir: "${wandb.run_name}-${now:%Y-%m-%d-%H-%M-%S}"
+
+model:
+  cfg:
+    out_dir: "${hydra:run.dir}"
+    use_lr_schedule: false
+    max_lr: 0.0001
+    vh_ckpt_path: null
+    vl_ckpt_path: null
+
+  datamodule:
+    _target_: igcraft.model.datamodule.PairedStructureDatamodule
+    cfg:
+      _target_: igcraft.model.config.PairedStructureDatamoduleConfig
+      batch_size: 64
+      train_dataset: "igcraft_model/data/train_structures.hdf5"
+      val_dataset: "igcraft_model/data/val_structures.hdf5"
+      test_dataset: "igcraft_model/data/test_structures.hdf5"
+      max_epitope_length: 128
+      vh_key: "vh"
+      vl_key: "vl"
+      epitope_key: "epitope"
+
+  network:
+    cfg:
+      freeze_all: true 
+
+    structure_encoder:
+      _target_: igcraft.nn.geometric.PairedStructureEncoder
+      input_vh_dim: ${model.network.backbone_heavy.cfg.embed_dim}
+      input_vl_dim: ${model.network.backbone_light.cfg.embed_dim}
+      embed_dim: 512
+      num_heads: 64
+      num_layers: 4
+      dropout_p: 0.1
+      gate_bias_value: -5.0

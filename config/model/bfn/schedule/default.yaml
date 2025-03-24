@@ -1,0 +1,4 @@
+_target_: igcraft.bfn.schedule.DiscreteBFNAccuracySchedule
+
+variables_shape: ${model.bfn.variables_shape}
+beta_1: 1.0

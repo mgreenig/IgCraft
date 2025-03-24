@@ -1,0 +1,9 @@
+_target_: igcraft.model.datamodule.IMGTTokenizer
+region_lengths:
+  fwr1: 26
+  cdr1: 12
+  fwr2: 18
+  cdr2: 8
+  fwr3: 38
+  cdr3: 14
+  fwr4: 11
