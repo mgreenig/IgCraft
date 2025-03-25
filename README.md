@@ -1,9 +1,9 @@
 # IgCraft: A versatile generative model for paired human antibody sequences
 
-<table style="border: none; border-collapse: collapse;">
-  <tr>
-    <td style="border: none; vertical-align: top;">
-    
+<div style="display: flex; align-items: flex-start;">
+
+  <div style="flex: 1; padding-right: 20px;">
+  
 IgCraft is a paired antibody sequence generative model that can perform a wide variety of sequence design tasks, including
 
 - **Unconditional generation**: Generate paired human antibody sequences from scratch.
@@ -11,12 +11,14 @@ IgCraft is a paired antibody sequence generative model that can perform a wide v
 - **Inverse folding**: Conditionally generate full length VH/VL sequences given an input structure.
 - **CDR grafting**: Conditionally generate (humanised) framework sequences given an input set of CDR structures.
 
-    </td>
-    <td style="border: none; padding-left: 20px;">
-      <img src="images/logo.png" alt="IgCraft logo" width="200"/>
-    </td>
-  </tr>
-</table>
+  </div>
+
+  <div style="flex-shrink: 0;">
+    <img src="images/logo.png" alt="IgCraft logo" width="150">
+  </div>
+
+</div>
+
 ## Environment setup
 
 To setup the virtual environment use the `environment.yml` file. We recommend using `mamba`. If you don't have
