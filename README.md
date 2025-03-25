@@ -1,13 +1,8 @@
 # IgCraft: A versatile generative model for paired human antibody sequences
 
-<style>
-  table#logo-table td {
-    border: none;
-  }
-</style>
-<table id="logo-table" style="width: 100%;">
-  <tr>
-    <td style="vertical-align: top; padding-right: 20px;">
+<p align="center">
+  <img src="images/logo.png" alt="IgCraft schematic" width="200"/>
+</p>
 
 IgCraft is a paired antibody sequence generative model that can perform a wide variety of sequence design tasks, including
 
@@ -15,13 +10,6 @@ IgCraft is a paired antibody sequence generative model that can perform a wide v
 - **Sequence inpainting**: Conditionally generate arbitrary IMGT region sequences (H-cdr1, H-fwr3, L-cdr3, etc.) given the remaining regions.
 - **Inverse folding**: Conditionally generate full length VH/VL sequences given an input structure.
 - **CDR grafting**: Conditionally generate (humanised) framework sequences given an input set of CDR structures.
-
-    </td>
-    <td>
-      <img src="images/logo.png" alt="IgCraft schematic" width="200">
-    </td>
-  </tr>
-</table>
 
 ## Environment setup
 
