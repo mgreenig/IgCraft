@@ -22,9 +22,8 @@ model:
 
   datamodule:
     cfg:
-      train_dataset: "/spinning2/shared/databases/unpaired_oas/unpaired_vh_train.pqt"
-      val_dataset: "/spinning2/shared/databases/unpaired_oas/unpaired_vh_val.pqt"
-      test_dataset: "/spinning2/shared/databases/unpaired_oas/unpaired_vh_test.pqt"
+      train_dataset: "train-data/unpaired_vh_train.pqt"
+      val_dataset: "train-data/unpaired_vh_val.pqt"
 
   bfn:
     # number of variables for the BFN is the sum of all the region lengths

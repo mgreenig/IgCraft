@@ -30,9 +30,8 @@ model:
   datamodule:
     cfg:
       batch_size: 256
-      train_dataset: "/spinning2/shared/databases/paired_oas/paired_train.csv"
-      val_dataset: "/spinning2/shared/databases/paired_oas/paired_val.csv"
-      test_dataset: "/spinning2/shared/databases/paired_oas/paired_test.csv"
+      train_dataset: "train-data/paired_train.csv"
+      val_dataset: "train-data/paired_val.csv"
 
   network:
     cfg:

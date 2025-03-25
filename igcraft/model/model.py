@@ -802,6 +802,12 @@ class UnpairedSequenceBFNSampler(SequenceSampler[UnpairedSequenceBFN]):
 
             theta = theta[torch.arange(theta.shape[0], device=theta.device), sample_idx]
 
+            # Set pad tokens logits for non-pad tokens to -inf
+            if fix_length:
+                non_pad_mask = cond_seq != AA1_INDEX["-"]
+                batch_idx, seq_idx = torch.nonzero(non_pad_mask, as_tuple=True)
+                theta[batch_idx, seq_idx, AA1_INDEX["-"]] = -float("inf")
+
         sample = model.bfn.sample_from_logits(theta)
         return sample
 
@@ -1524,6 +1530,12 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
             )
             sample_idx = particle_probs.argmax(-1)
             theta = theta[torch.arange(theta.shape[0], device=theta.device), sample_idx]
+
+            # Set pad tokens logits for non-pad tokens to -inf
+            if fix_length:
+                non_pad_mask = cond_seq != AA1_INDEX["-"]
+                batch_idx, seq_idx = torch.nonzero(non_pad_mask, as_tuple=True)
+                theta[batch_idx, seq_idx, AA1_INDEX["-"]] = -float("inf")
 
         sample = model.bfn.sample_from_logits(theta)
         vh_sample, vl_sample = sample[:, : self.vh_len], sample[:, self.vh_len :]

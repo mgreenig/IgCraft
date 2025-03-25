@@ -20,7 +20,7 @@ from igcraft.model import load_model, init_model
 OmegaConf.register_new_resolver("sum", lambda *args: sum(args))
 
 
-@hydra.main(version_base=None, config_path="../config")
+@hydra.main(version_base=None, config_path="../config", config_name="inpaint")
 def main(cfg: DictConfig) -> None:
     """
     Runs inpainting for an input set of sequences and IMGT regions, saving the

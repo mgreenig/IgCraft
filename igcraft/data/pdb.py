@@ -10,7 +10,7 @@ import h5py
 import numpy as np
 from Bio.Data.PDBData import protein_letters_3to1
 from Bio import SeqIO
-from Bio.PDB import PDBParser
+from Bio.PDB import MMCIFParser, PDBParser
 from Bio.PDB.Polypeptide import is_aa
 from Bio.PDB.Residue import Residue
 from Bio.Seq import Seq
@@ -75,7 +75,12 @@ class AntibodyPDBData:
         :return: An data PDB data object.
         """
         try:
-            parser = PDBParser(QUIET=True)
+            if ".pdb" in str(path):
+                parser = PDBParser(QUIET=True)
+            elif ".cif" in str(path):
+                parser = MMCIFParser(QUIET=True)
+            else:
+                raise ValueError("File must be a PDB or CIF file.")
 
             if path.suffix == ".gz":
                 with gzip.open(path, "rt") as f:
@@ -258,6 +263,7 @@ class AntibodyPDBData:
                 chain_pairings=chain_pairings,
                 chain_species=chain_species,
             )
+
         except Exception as e:
             logger.error(f"Error processing {path}: {e}")
             return None

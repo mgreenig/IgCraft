@@ -157,11 +157,10 @@ class DiscreteBFNSDESolver:
     information from previous predictions to reduce discretization error in the SDE.
     """
 
-    def __init__(self, noise_scale: float = 1.0):
+    def __init__(self):
         """
-        :param noise_scale: The scale of the noise in the SDE.
+        Initialises the BFN SDE solver.
         """
-        self.noise_scale = noise_scale
         self.previous_probs = None
 
     def __call__(

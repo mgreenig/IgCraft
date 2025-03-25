@@ -24,7 +24,7 @@ from igcraft.model.datamodule import PairedStructureDatamodule
 OmegaConf.register_new_resolver("sum", lambda *args: sum(args))
 
 
-@hydra.main(version_base=None, config_path="../config")
+@hydra.main(version_base=None, config_path="../config", config_name="graft_cdrs")
 def main(cfg: DictConfig) -> None:
     """
     Runs CDR grafting for an input set of PDB files.
@@ -63,7 +63,7 @@ def main(cfg: DictConfig) -> None:
     if not pdb_path.exists():
         raise FileNotFoundError(f"Path {pdb_path} does not exist.")
     elif pdb_path.is_dir():
-        pdb_files = list(pdb_path.glob("*.pdb"))
+        pdb_files = list(pdb_path.glob("*.pdb")) + list(pdb_path.glob("*.cif"))
     else:
         pdb_files = [pdb_path]
 
@@ -230,7 +230,8 @@ def main(cfg: DictConfig) -> None:
             pred_seq = pred_sequences[i]
 
             for region, seq in pred_seq.items():
-                grafted_sequences[f"{region}_pred"].append(seq)
+                if region not in fwr_regions:
+                    grafted_sequences[f"{region}_pred"].append(seq)
 
             for region, seq in wt_seq.items():
                 grafted_sequences[f"{region}_wt"].append(seq)

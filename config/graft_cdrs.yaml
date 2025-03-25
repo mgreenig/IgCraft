@@ -1,21 +1,21 @@
 # Either a directory containing PDB files or a single PDB file to perform grafting on
-pdb_path: null
+pdb_path: "data/humanisation/test-pdb"
 
 # A CSV file storing PDB IDs (file stem) in the first column and the corresponding chains whose CDRs
 # should be grafted in the second column (as a singe string <VH ID>-<VL ID>).
-chain_map: null
+chain_map: "data/humanisation/test_chains.csv"
 
 run_name: "graft_cdrs"
 
 checkpoint:
-  config_path: "igcraft_model/.hydra/config.yaml"
-  checkpoint_path: "igcraft_model/checkpoints/final.ckpt"
+  config_path: "igcraft-model/.hydra/config.yaml"
+  checkpoint_path: "igcraft-model/checkpoints/final.ckpt"
   reset_optimizer: false
 
-batch_size: 4
-n_sequences: 1
-cdr_pad_length: 2
-use_structure: true
+batch_size: 1
+n_sequences: 1  # Number of framework sequences to generate for each set of CDRs
+cdr_pad_length: 2  # Number of residues to pad each CDR with on each side
+use_structure: true  # Whether to use the structure of the input CDRs (or only the sequence)
 progress_bar: false
 seed: 42
 out_dir: ${hydra:run.dir}
@@ -26,6 +26,8 @@ hydra:
     dir: ${run_name}-${now:%Y-%m-%d-%H-%M-%S}
 
 sampler:
+
+  # Don't touch these
   _target_: igcraft.model.model.PairedSequenceBFNSampler
   vh_len: ${sum:${model.datamodule.vh_tokenizer.region_lengths.fwr1},
     ${model.datamodule.vh_tokenizer.region_lengths.cdr1},
@@ -34,18 +36,10 @@ sampler:
     ${model.datamodule.vh_tokenizer.region_lengths.fwr3},
     ${model.datamodule.vh_tokenizer.region_lengths.cdr3},
     ${model.datamodule.vh_tokenizer.region_lengths.fwr4}}
+  solver:
+    _target_: igcraft.bfn.bfn.DiscreteBFNSDESolver
+
+  # Sampling settings
   num_steps: 20
   num_particles: 32
   temperature: 0.1
-
-  solver:
-    _target_: igcraft.bfn.bfn.DiscreteBFNSDESolver
-    noise_scale: 1.0
-
-## Add fields below to override or add to the existing model config in the checkpoint ##
-model:
-  cfg:
-  
-    # override the VH/VL pre-trained weights since those should no longer be loaded
-    vh_ckpt_path: null
-    vl_ckpt_path: null

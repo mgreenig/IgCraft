@@ -559,11 +559,6 @@ class UnpairedSequenceDatamodule(BaseDatamodule[UnpairedSequenceDataset]):
         else:
             self._val_dataset = None
 
-        if cfg.test_dataset is not None:
-            self._test_dataset = self.get_dataset(cfg.test_dataset)
-        else:
-            self._test_dataset = None
-
         self.num_workers = cfg.num_workers
         self.batch_size = cfg.batch_size
 
@@ -668,11 +663,6 @@ class UnpairedSequenceDatamodule(BaseDatamodule[UnpairedSequenceDataset]):
         """The validation dataset."""
         return self._val_dataset
 
-    @property
-    def test_dataset(self):
-        """The test dataset."""
-        return self._test_dataset
-
     def setup(self, stage: str):
         """Performs the train/test/validation split according to the proportions passed to the constructor."""
         if stage == "fit" and (
@@ -681,9 +671,6 @@ class UnpairedSequenceDatamodule(BaseDatamodule[UnpairedSequenceDataset]):
             raise ValueError(
                 "No train or validation dataset provided, setup failed for stage='fit'."
             )
-
-        if stage == "test" and self._test_dataset is None:
-            raise ValueError("No test dataset provided, setup failed for stage='test'.")
 
     def train_dataloader(self) -> DataLoader:
         """The train dataloader using the train dataset."""
@@ -702,19 +689,6 @@ class UnpairedSequenceDatamodule(BaseDatamodule[UnpairedSequenceDataset]):
         """
         return DataLoader(
             self._val_dataset,
-            shuffle=False,
-            num_workers=self.num_workers,
-            batch_size=self.batch_size,
-            pin_memory=True,
-        )
-
-    def test_dataloader(self) -> DataLoader:
-        """
-        The test dataloader using the test dataset. This is typically used
-        for final model evaluation.
-        """
-        return DataLoader(
-            self._test_dataset,
             shuffle=False,
             num_workers=self.num_workers,
             batch_size=self.batch_size,
@@ -756,11 +730,6 @@ class PairedSequenceDatamodule(BaseDatamodule[PairedSequenceDataset]):
             self._val_dataset = self.get_dataset(cfg.val_dataset)
         else:
             self._val_dataset = None
-
-        if cfg.test_dataset is not None:
-            self._test_dataset = self.get_dataset(cfg.test_dataset)
-        else:
-            self._test_dataset = None
 
         self.num_workers = cfg.num_workers
         self.batch_size = cfg.batch_size
@@ -926,11 +895,6 @@ class PairedSequenceDatamodule(BaseDatamodule[PairedSequenceDataset]):
         """The validation dataset."""
         return self._val_dataset
 
-    @property
-    def test_dataset(self):
-        """The test dataset."""
-        return self._test_dataset
-
     def setup(self, stage: str):
         """Performs the train/test/validation split according to the proportions passed to the constructor."""
         if stage == "fit" and (
@@ -939,9 +903,6 @@ class PairedSequenceDatamodule(BaseDatamodule[PairedSequenceDataset]):
             raise ValueError(
                 "No train or validation dataset provided, setup failed for stage='fit'."
             )
-
-        if stage == "test" and self._test_dataset is None:
-            raise ValueError("No test dataset provided, setup failed for stage='test'.")
 
     def train_dataloader(self) -> DataLoader:
         """The train dataloader using the train dataset."""
@@ -960,19 +921,6 @@ class PairedSequenceDatamodule(BaseDatamodule[PairedSequenceDataset]):
         """
         return DataLoader(
             self._val_dataset,
-            shuffle=False,
-            num_workers=self.num_workers,
-            batch_size=self.batch_size,
-            pin_memory=True,
-        )
-
-    def test_dataloader(self) -> DataLoader:
-        """
-        The test dataloader using the test dataset. This is typically used
-        for final model evaluation.
-        """
-        return DataLoader(
-            self._test_dataset,
             shuffle=False,
             num_workers=self.num_workers,
             batch_size=self.batch_size,
@@ -1019,11 +967,6 @@ class PairedStructureDatamodule(PairedSequenceDatamodule):
         else:
             self._val_dataset = None
 
-        if cfg.test_dataset is not None:
-            self._test_dataset = self.get_dataset(cfg.test_dataset)
-        else:
-            self._test_dataset = None
-
         self.num_workers = cfg.num_workers
         self.batch_size = cfg.batch_size
 
@@ -1052,7 +995,7 @@ class PairedStructureDatamodule(PairedSequenceDatamodule):
         :param path: The path to the dataset.
         :return: The paired structure or sequence dataset.
         """
-        if path.endswith(".csv"):
+        if path.endswith(".csv") or path.endswith(".pqt"):
             dataset = PairedSequenceDataset(
                 path,
                 self.vh_colnames,

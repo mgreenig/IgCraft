@@ -36,9 +36,8 @@ model:
     cfg:
       _target_: igcraft.model.config.PairedStructureDatamoduleConfig
       batch_size: 64
-      train_dataset: "igcraft_model/data/train_structures.hdf5"
-      val_dataset: "igcraft_model/data/val_structures.hdf5"
-      test_dataset: "igcraft_model/data/test_structures.hdf5"
+      train_dataset: "train-data/train_structures.hdf5"
+      val_dataset: "train-data/val_structures.hdf5"
       max_epitope_length: 128
       vh_key: "vh"
       vl_key: "vl"

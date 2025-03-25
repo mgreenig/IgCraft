@@ -22,7 +22,7 @@ from igcraft.model import load_model, init_model
 OmegaConf.register_new_resolver("sum", lambda *args: sum(args))
 
 
-@hydra.main(version_base=None, config_path="../config")
+@hydra.main(version_base=None, config_path="../config", config_name="sample")
 def main(cfg: DictConfig) -> None:
     """
     Runs unconditional sampling and saves a FASTA file where VH/VL chains are
@@ -48,7 +48,7 @@ def main(cfg: DictConfig) -> None:
 
     seed_everything(cfg.seed)
 
-    logger.info(f"Sampling {cfg.num_samples} VH/VL pairs...")
+    logger.info(f"Sampling {cfg.n_sequences} VH/VL pairs...")
 
     # Instantiate the sampler
     sampler = instantiate(cfg.sampler)
@@ -56,8 +56,8 @@ def main(cfg: DictConfig) -> None:
     # Run unconditional sampling
     with torch.no_grad():
         sequences = []
-        for i in range(0, cfg.num_samples, cfg.batch_size):
-            batch_size = min(cfg.batch_size, cfg.num_samples - i)
+        for i in range(0, cfg.n_sequences, cfg.batch_size):
+            batch_size = min(cfg.batch_size, cfg.n_sequences - i)
             sampled_batch = sampler(
                 model, num_samples=batch_size, progress_bar=cfg.progress_bar
             )

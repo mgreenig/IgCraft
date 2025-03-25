@@ -23,7 +23,7 @@ from igcraft.model.datamodule import PairedStructureDatamodule
 OmegaConf.register_new_resolver("sum", lambda *args: sum(args))
 
 
-@hydra.main(version_base=None, config_path="../config")
+@hydra.main(version_base=None, config_path="../config", config_name="inverse_fold")
 def main(cfg: DictConfig) -> None:
     """
     Runs inverse folding for an input set of PDB files.
@@ -62,7 +62,7 @@ def main(cfg: DictConfig) -> None:
     if not pdb_path.exists():
         raise FileNotFoundError(f"Path {pdb_path} does not exist.")
     elif pdb_path.is_dir():
-        pdb_files = list(pdb_path.glob("*.pdb"))
+        pdb_files = list(pdb_path.glob("*.pdb")) + list(pdb_path.glob("*.cif"))
     else:
         pdb_files = [pdb_path]
 

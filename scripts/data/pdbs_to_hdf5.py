@@ -20,8 +20,7 @@ def parse_args():
     """Parses command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dir",
-        "-d",
+        "dir",
         type=str,
         help="Path to the directory containing antibody PDB files.",
     )
