@@ -169,7 +169,6 @@ class DiscreteBFNSDESolver:
         probs: torch.Tensor,
         beta: torch.Tensor,
         beta_next: torch.Tensor,
-        t: torch.Tensor,
         t_next: torch.Tensor,
         conditional_score: torch.Tensor | None = None,
     ) -> torch.Tensor:
@@ -182,10 +181,7 @@ class DiscreteBFNSDESolver:
             the attribute :code:`variables_shape`.
         :param beta_next: The beta value for the next time step. Should be the shape specified by
             the attribute :code:`variables_shape`.
-        :param t: The current time step.
         :param t_next: The next time step.
-        :param conditional_score: Per-variable conditional score (gradient of log prob of conditional data
-            wrt network inputs). Should be the same shape as :code:`logits`.
         :return: The updated logits.
         """
         alpha = beta_next - beta
