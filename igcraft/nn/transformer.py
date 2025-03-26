@@ -1,8 +1,10 @@
 """Attention-based network architectures.
 
 Example usage:
+    >>> import torch
+    >>> from igcraft.model.attention import SelfAttentionBlock
     >>> s_i = torch.randn(1, 128, 64)
-    >>> self_attention = SelfAttentionBlock(embed_dim=128, head_dim=16, num_heads=8)
+    >>> self_attention = SelfAttentionBlock(embed_dim=64, num_heads=8)
     >>> s_i = self_attention(s_i)
 """
 
