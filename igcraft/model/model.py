@@ -647,7 +647,6 @@ class UnpairedSequenceBFNSampler(SequenceSampler[UnpairedSequenceBFN]):
             cond_seq = None
             cond_data = None
 
-        score = None
         if cond_seq is None:
             pred = model.forward((theta, cond_data), t)
 
@@ -692,7 +691,7 @@ class UnpairedSequenceBFNSampler(SequenceSampler[UnpairedSequenceBFN]):
             # Collapse the particle dimension back into the batch
             probs = rearrange(probs, "b p l d -> (b p) l d")
 
-        theta = self.solver(theta, probs, beta, beta_next, t, t_next, score)
+        theta = self.solver(theta, probs, beta, beta_next)
 
         return theta
 
@@ -777,6 +776,8 @@ class UnpairedSequenceBFNSampler(SequenceSampler[UnpairedSequenceBFN]):
                 cond_mask=cond_mask,
                 downweight_pads=fix_length,
             )
+
+        self.solver.reset()
 
         # Perform final forward pass at t=1
         t = time_steps[-1].expand(theta.shape[0])
@@ -1398,7 +1399,7 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
             # Collapse the particle dimension back into the batch
             probs = rearrange(probs, "b p l d -> (b p) l d")
 
-        theta = self.solver(theta, probs, beta, beta_next, t, t_next)
+        theta = self.solver(theta, probs, beta, beta_next)
 
         return theta
 
@@ -1502,6 +1503,8 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
                 cond_mask=cond_mask,
                 downweight_pads=fix_length,
             )
+
+        self.solver.reset()
 
         # Perform final forward pass at t=1
         t = time_steps[-1].expand(theta.shape[0])

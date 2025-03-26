@@ -163,14 +163,18 @@ class DiscreteBFNSDESolver:
         """
         self.previous_probs = None
 
+    def reset(self) -> None:
+        """
+        Resets the solver by clearing the previous probabilities.
+        """
+        self.previous_probs = None
+
     def __call__(
         self,
         logits: torch.Tensor,
         probs: torch.Tensor,
         beta: torch.Tensor,
-        beta_next: torch.Tensor,
-        t_next: torch.Tensor,
-        conditional_score: torch.Tensor | None = None,
+        beta_next: torch.Tensor
     ) -> torch.Tensor:
         """
         Takes a step in logit space to update the current distribution parameters.
@@ -181,7 +185,6 @@ class DiscreteBFNSDESolver:
             the attribute :code:`variables_shape`.
         :param beta_next: The beta value for the next time step. Should be the shape specified by
             the attribute :code:`variables_shape`.
-        :param t_next: The next time step.
         :return: The updated logits.
         """
         alpha = beta_next - beta
@@ -199,9 +202,5 @@ class DiscreteBFNSDESolver:
         updated_logits = logits + drift + diffusion
 
         self.previous_probs = probs.clone()
-
-        # If at t=1, reset the previous_probs
-        if torch.all(t_next == 1.0).item():
-            self.previous_probs = None
 
         return updated_logits
