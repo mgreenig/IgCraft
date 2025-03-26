@@ -1,0 +1,8 @@
+defaults:
+  - network: paired
+  - bfn: discrete
+  - datamodule: paired
+  - cfg: paired
+  - _self_
+
+_target_: igcraft.model.PairedSequenceBFN

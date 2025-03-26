@@ -1,0 +1,43 @@
+# Either a directory containing PDB files or a single PDB file to perform inverse folding on
+pdb_path: "data/inverse-folding/test-pdb"
+
+# A CSV file storing PDB IDs (file stem) in the first column and the corresponding chains to inverse
+# fold in the second column (as a singe string <VH ID>-<VL ID>).
+chain_map: "data/inverse-folding/test_chains.csv"
+
+run_name: "inverse_folding"
+
+checkpoint:
+  config_path: "igcraft-model/.hydra/config.yaml"
+  checkpoint_path: "igcraft-model/checkpoints/final.ckpt"
+  reset_optimizer: false
+
+batch_size: 1
+n_sequences: 1  # Number of sequences to generate for each structure
+progress_bar: false
+seed: 42
+out_dir: ${hydra:run.dir}
+device: "cuda"
+
+hydra:
+  run:
+    dir: ${run_name}-${now:%Y-%m-%d-%H-%M-%S}
+
+sampler:
+
+  # Don't touch these
+  _target_: igcraft.model.model.PairedSequenceBFNSampler
+  vh_len: ${sum:${model.datamodule.vh_tokenizer.region_lengths.fwr1},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr1},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr2},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr2},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr3},
+    ${model.datamodule.vh_tokenizer.region_lengths.cdr3},
+    ${model.datamodule.vh_tokenizer.region_lengths.fwr4}}
+  solver:
+    _target_: igcraft.bfn.bfn.DiscreteBFNSDESolver
+
+  # Sampling settings
+  num_steps: 20
+  num_particles: 8
+  temperature: 0.1

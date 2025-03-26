@@ -1,0 +1,8 @@
+defaults:
+  - network: backbones/120M
+  - bfn: discrete
+  - datamodule: unpaired_vl
+  - cfg: defaults
+  - _self_
+
+_target_: igcraft.model.UnpairedSequenceBFN

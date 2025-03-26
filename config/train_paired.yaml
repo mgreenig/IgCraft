@@ -1,0 +1,58 @@
+defaults:
+  - trainer: defaults
+  - model: paired_bfn
+  - _self_
+
+wandb:
+  entity: "sormanni-lab"
+  project: "IgCraft"
+  run_name: "train_paired_bfn"
+  tags: null
+
+checkpoint:
+  config_path: null  # Update to use an existing run config
+  checkpoint_path: null  # Update to use existing weights
+  reset_optimizer: false  # Whether to reset optimizer state
+
+trainer:
+  max_epochs: 100
+
+hydra:
+  run:
+    dir: "${wandb.run_name}-${now:%Y-%m-%d-%H-%M-%S}"
+
+model:
+  cfg:
+    out_dir: "${hydra:run.dir}"
+    vh_ckpt_path: "igcraft_model/unpaired_vh/checkpoints/epoch=3-step=447147.ckpt"
+    vl_ckpt_path: "igcraft_model/unpaired_vl/checkpoints/epoch=3-step=425217.ckpt"
+
+  datamodule:
+    cfg:
+      batch_size: 256
+      train_dataset: "train-data/paired_train.csv"
+      val_dataset: "train-data/paired_val.csv"
+
+  network:
+    cfg:
+      freeze_heavy: false
+      freeze_light: false
+      gate_bias_value: -5.0
+
+  bfn:
+    # number of variables for the BFN is the sum of all the region lengths
+    variables_shape:
+      - ${sum:${model.datamodule.vh_tokenizer.region_lengths.fwr1},
+              ${model.datamodule.vh_tokenizer.region_lengths.cdr1},
+              ${model.datamodule.vh_tokenizer.region_lengths.fwr2},
+              ${model.datamodule.vh_tokenizer.region_lengths.cdr2},
+              ${model.datamodule.vh_tokenizer.region_lengths.fwr3},
+              ${model.datamodule.vh_tokenizer.region_lengths.cdr3},
+              ${model.datamodule.vh_tokenizer.region_lengths.fwr4},
+              ${model.datamodule.vl_tokenizer.region_lengths.fwr1}, 
+              ${model.datamodule.vl_tokenizer.region_lengths.cdr1}, 
+              ${model.datamodule.vl_tokenizer.region_lengths.fwr2},
+              ${model.datamodule.vl_tokenizer.region_lengths.cdr2}, 
+              ${model.datamodule.vl_tokenizer.region_lengths.fwr3},
+              ${model.datamodule.vl_tokenizer.region_lengths.cdr3},
+              ${model.datamodule.vl_tokenizer.region_lengths.fwr4}}

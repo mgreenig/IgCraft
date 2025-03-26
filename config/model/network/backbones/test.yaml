@@ -1,0 +1,13 @@
+# A config for a small transformer backbone that can be used for testing
+
+_target_: igcraft.model.network.SequenceTransformer
+cfg:
+  _target_: igcraft.model.network.SequenceTransformerConfig
+  num_layers: 2
+  embed_dim: 16
+  num_heads: 4
+  dropout_p: 0.1
+  output_dim: 21
+  use_entropy_encoding: true
+  fourier_n_min: -1
+  fourier_n_max: 16

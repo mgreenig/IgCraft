@@ -1,0 +1,21 @@
+defaults:
+  - vl_tokenizer/defaults@tokenizer
+  - _self_
+
+_target_: igcraft.model.datamodule.UnpairedSequenceDatamodule
+
+cfg:
+  _target_: igcraft.model.config.UnpairedSequenceDatamoduleConfig
+
+  batch_size: 512
+  num_workers: 4
+
+  colnames: [
+    "fwr1_aa",
+    "cdr1_aa",
+    "fwr2_aa",
+    "cdr2_aa",
+    "fwr3_aa",
+    "cdr3_aa",
+    "fwr4_aa"
+  ]

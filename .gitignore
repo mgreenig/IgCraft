@@ -1,0 +1,13 @@
+build/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+__MACOSX
+
+.idea
+.ipynb_checkpoints
+.DS_Store
+data
+igcraft-model*
+test-data*
+train-data*

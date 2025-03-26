@@ -1,0 +1,14 @@
+defaults:
+  - backbones/120M@backbone_heavy
+  - backbones/120M@backbone_light
+  - _self_
+
+_target_: igcraft.model.network.PairedSequenceTransformer
+cfg:
+  _target_: igcraft.model.network.PairedSequenceTransformerConfig
+  embed_dim: 256
+  num_heads: 8
+  dropout_p: 0.1
+  gate_bias_value: 0.0
+  freeze_heavy: false
+  freeze_light: false

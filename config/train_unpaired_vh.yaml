@@ -1,0 +1,37 @@
+defaults:
+  - trainer: defaults
+  - model: unpaired_vh_bfn
+  - _self_
+
+wandb:
+  entity: null
+  project: null
+  run_name: "train_unpaired_vh_bfn"
+  tags: null
+
+trainer:
+  max_epochs: 100
+
+hydra:
+  run:
+    dir: "${wandb.run_name}-${now:%Y-%m-%d-%H-%M-%S}"
+
+model:
+  cfg:
+    out_dir: "${hydra:run.dir}"
+
+  datamodule:
+    cfg:
+      train_dataset: "train-data/unpaired_vh_train.pqt"
+      val_dataset: "train-data/unpaired_vh_val.pqt"
+
+  bfn:
+    # number of variables for the BFN is the sum of all the region lengths
+    variables_shape:
+      - ${sum:${model.datamodule.tokenizer.region_lengths.fwr1},
+              ${model.datamodule.tokenizer.region_lengths.cdr1},
+              ${model.datamodule.tokenizer.region_lengths.fwr2},
+              ${model.datamodule.tokenizer.region_lengths.cdr2},
+              ${model.datamodule.tokenizer.region_lengths.fwr3},
+              ${model.datamodule.tokenizer.region_lengths.cdr3},
+              ${model.datamodule.tokenizer.region_lengths.fwr4}}
