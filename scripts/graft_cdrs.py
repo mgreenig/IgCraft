@@ -146,14 +146,6 @@ def main(cfg: DictConfig) -> None:
         )  # only reveal pads if we are padding the CDRs
         vh_cond_mask, vl_cond_mask = cond_mask
 
-        # Mask the framework regions of the structure data
-        vh_fwr_mask = torch.zeros(
-            (datamodule.vh_length,), device=model.device, dtype=torch.bool
-        )
-        vl_fwr_mask = torch.zeros(
-            (datamodule.vl_length,), device=model.device, dtype=torch.bool
-        )
-
         vh_imgt_idx = datamodule.vh_region_indices
         vl_imgt_idx = datamodule.vl_region_indices
 
@@ -165,6 +157,7 @@ def main(cfg: DictConfig) -> None:
             vl.shape, device=vl_cond_mask.device, dtype=torch.bool
         )
 
+        # Expose padded elements from the framework regions if specified
         if cfg.cdr_pad_length > 0:
             for i, (vh_seq, vl_seq) in enumerate(zip(vh, vl)):
                 vh_non_pad_mask = vh_seq != AA1_INDEX["-"]
@@ -195,21 +188,47 @@ def main(cfg: DictConfig) -> None:
                         vh_pad_mask[i, vh_region_idx[-cfg.cdr_pad_length :]] = True
                         vl_pad_mask[i, vl_region_idx[-cfg.cdr_pad_length :]] = True
 
-        for i, region in enumerate(fwr_regions):
-            # Mask the framework regions from the structure encoder
-            vh_fwr_mask[..., vh_imgt_idx[region]] = True
-            vl_fwr_mask[..., vl_imgt_idx[region]] = True
-
             # Unmask the padded CDR regions
             vh_cond_mask[vh_pad_mask] = True
             vl_cond_mask[vl_pad_mask] = True
 
         cond_mask = (vh_cond_mask, vl_cond_mask)
 
-        cond_data.vh.mask |= vh_fwr_mask[None]
-        cond_data.vl.mask |= vl_fwr_mask[None]
+        # Mask the framework and CDR regions from the structure encoder if specified
+        if not cfg.use_fwr_structure:
+            vh_fwr_mask = torch.zeros(
+                (datamodule.vh_length,), device=model.device, dtype=torch.bool
+            )
+            vl_fwr_mask = torch.zeros(
+                (datamodule.vl_length,), device=model.device, dtype=torch.bool
+            )
 
-        if not cfg.use_structure:
+            for region in fwr_regions:
+                # Mask the framework regions from the structure encoder
+                vh_fwr_mask[..., vh_imgt_idx[region]] = True
+                vl_fwr_mask[..., vl_imgt_idx[region]] = True
+
+            cond_data.vh.mask |= vh_fwr_mask[None]
+            cond_data.vl.mask |= vl_fwr_mask[None]
+
+        if not cfg.use_cdr_structure:
+            vh_cdr_mask = torch.zeros(
+                (datamodule.vh_length,), device=model.device, dtype=torch.bool
+            )
+            vl_cdr_mask = torch.zeros(
+                (datamodule.vl_length,), device=model.device, dtype=torch.bool
+            )
+
+            for region in ["cdr1", "cdr2", "cdr3"]:
+                # Mask the cdr regions from the structure encoder
+                vh_cdr_mask[..., vh_imgt_idx[region]] = True
+                vl_cdr_mask[..., vl_imgt_idx[region]] = True
+
+            cond_data.vh.mask |= vh_cdr_mask[None]
+            cond_data.vl.mask |= vl_cdr_mask[None]
+
+        # If no structure is used, pass None to the model
+        if not (cfg.use_cdr_structure or cfg.use_fwr_structure):
             batch = (seq_data, None)
 
         with torch.no_grad():

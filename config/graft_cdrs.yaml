@@ -15,7 +15,8 @@ checkpoint:
 batch_size: 1
 n_sequences: 1  # Number of framework sequences to generate for each set of CDRs
 cdr_pad_length: 2  # Number of residues to pad each CDR with on each side
-use_structure: true  # Whether to use the structure of the input CDRs (or only the sequence)
+use_cdr_structure: true  # Whether to use the structure of the input CDRs (or only the sequence)
+use_fwr_structure: false  # Whether to use the structure of the input framework as conditioning
 progress_bar: false
 seed: 42
 out_dir: ${hydra:run.dir}

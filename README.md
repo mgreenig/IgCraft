@@ -120,3 +120,6 @@ python scripts/graft_cdrs.py pdb_path=/path/to/pdb run_name=graft_cdrs
 
 The output of CDR is a CSV file containing the wild-type sequence for each IMGT region and the generated
 sequences for the framework IMGT regions.
+
+By default, CDR grafting generates framework sequences conditional only on the input CDR sequences and structures.
+You can also condition on the structure of the framework regions by passing the argument `use_fwr_structure=true`.
