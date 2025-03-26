@@ -54,7 +54,6 @@ class SequenceTransformerConfig:
     :param fourier_n_max: The :code:`n_max` value to use for the fourier feature encoding of the time or entropy.
         See https://arxiv.org/pdf/2107.00630 (page 16) for more details. Default value of 16 taken from
         https://www.biorxiv.org/content/10.1101/2024.09.24.614734v1.full.pdf.
-    :param structure_encoder: Configuration for a structure encoder.
     """
 
     num_layers: int
