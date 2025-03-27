@@ -9,6 +9,9 @@ from pathlib import Path
 import hydra
 import pandas as pd
 import torch
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from loguru import logger
@@ -255,12 +258,30 @@ def main(cfg: DictConfig) -> None:
             for region, seq in wt_seq.items():
                 grafted_sequences[f"{region}_wt"].append(seq)
 
-    # Save the inverse folded sequences to a CSV file
+    # Save the grafted sequences to a CSV file
     grafted_sequence_df = pd.DataFrame(grafted_sequences)
+    grafted_sequence_df["grafted_vh"] = grafted_sequence_df[
+        ["H-fwr1_pred", "H-cdr1_wt", "H-fwr2_pred", "H-cdr2_wt", "H-fwr3_pred", "H-cdr3_wt", "H-fwr4_pred"]
+    ].apply(lambda x: "".join(x), axis=1)
+    grafted_sequence_df["grafted_vl"] = grafted_sequence_df[
+        ["L-fwr1_pred", "L-cdr1_wt", "L-fwr2_pred", "L-cdr2_wt", "L-fwr3_pred", "L-cdr3_wt", "L-fwr4_pred"]
+    ].apply(lambda x: "".join(x), axis=1)
     grafted_sequence_df.to_csv(f"{cfg.out_dir}/grafted_sequences.csv", index=False)
 
+    # Save the grafted sequences to a FASTA file
+    records = []
+    for (pdb_id, vh_id, vl_id), df in grafted_sequence_df.groupby(["pdb_id", "vh_id", "vl_id"]):
+        for i, row in df.reset_index().iterrows():
+            seq = Seq(f"{row['grafted_vh']}:{row['grafted_vl']}")
+            seq_id = f"{pdb_id}_{vh_id}_{vl_id}_{i}"
+            record = SeqRecord(seq, id=seq_id, description="")
+            records.append(record)
+
+    with open(f"{cfg.out_dir}/grafted_sequences.fasta", "w") as f:
+        SeqIO.write(records, f, "fasta")
+
     logger.info(
-        f"Run finished! Saved generated framework sequences to {cfg.out_dir}/grafted_sequences.csv."
+        f"Run finished! Saved generated framework sequences to {cfg.out_dir}."
     )
 
 
