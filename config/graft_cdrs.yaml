@@ -3,7 +3,7 @@ pdb_path: "data/humanisation/test-pdb"
 
 # A CSV file storing PDB IDs (file stem) in the first column and the corresponding chains whose CDRs
 # should be grafted in the second column (as a singe string <VH ID>-<VL ID>).
-chain_map: "data/humanisation/test_chains.csv"
+chain_map: null
 
 run_name: "graft_cdrs"
 

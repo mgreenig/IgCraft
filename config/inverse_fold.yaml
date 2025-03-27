@@ -3,7 +3,7 @@ pdb_path: "data/inverse-folding/test-pdb"
 
 # A CSV file storing PDB IDs (file stem) in the first column and the corresponding chains to inverse
 # fold in the second column (as a singe string <VH ID>-<VL ID>).
-chain_map: "data/inverse-folding/test_chains.csv"
+chain_map: null
 
 run_name: "inverse_folding"
 
