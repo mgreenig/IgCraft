@@ -43,17 +43,12 @@ def main(cfg: DictConfig) -> None:
     run_dir = hydra_cfg.run.dir
     OmegaConf.save(cfg, os.path.join(run_dir, ".hydra", "config.yaml"))
 
-    # Get the next run name
-    run_name = get_next_run_name(
-        cfg.wandb.entity, cfg.wandb.project, cfg.wandb.run_name
-    )
     config_dict = OmegaConf.to_container(cfg, resolve=True)
 
     # Initialize WandB
     wandb.init(
         entity=cfg.wandb.entity,
         project=cfg.wandb.project,
-        name=run_name,
         tags=cfg.wandb.tags,
         config=config_dict,
     )

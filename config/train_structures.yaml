@@ -6,7 +6,7 @@ defaults:
 wandb:
   entity: null
   project: null
-  run_name: "finetune_paired_bfn"
+  run_name: null
   tags: null
 
 checkpoint:

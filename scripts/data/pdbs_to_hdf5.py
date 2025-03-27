@@ -35,7 +35,7 @@ def parse_args():
         "--outfile",
         "-o",
         type=str,
-        default="sabdab.hdf5",
+        default="structures.hdf5",
         help="Path to save the HDF5 file.",
     )
     parser.add_argument(

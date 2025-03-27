@@ -6,7 +6,7 @@ defaults:
 wandb:
   entity: null
   project: null
-  run_name: "train_unpaired_vh_bfn"
+  run_name: null
   tags: null
 
 trainer:

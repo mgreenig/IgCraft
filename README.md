@@ -124,3 +124,50 @@ grafted into the generated framework sequences.
 
 By default, CDR grafting generates framework sequences conditional only on the input CDR sequences and structures.
 You can also condition on the structure of the framework regions by passing the argument `use_fwr_structure=true`.
+
+## Training IgCraft
+
+To train IgCraft, you can use the `train.py` script. You'll need to specify a `config-name`, which points
+to a YAML file in the `config` directory. We include the following configs for the different stages of training:
+
+- `train_structures.yaml` - Fine-tuning on paired antibody structures in HDF5 format
+- `train_paired.yaml` - Fine-tuning on paired antibody sequences in CSV format
+- `train_unpaired_vh.yaml` - Pre-training on VH sequences in CSV format
+- `train_unpaired_vl.yaml` - Pre-training on VL sequences in CSV format
+
+To obtain the training data we used, run:
+
+```bash 
+wget https://zenodo.org/records/15077225/files/train-data.zip && unzip train-data.zip
+```
+
+The training data is ~15Gb so this can take a while!
+
+By default, the dataset paths in the config files above point to the relevant path in the unzipped
+`train-data` directory. 
+
+You can also use your own data, but it needs to be formatted correctly!
+
+We format sequence datasets as CSV files with columns `{region}_aa_{chain_type}` where `{region}` is the 
+variable region (e.g. `fwr1`, `cdr1`, etc.) and `{chain_type}` is either `heavy` or `light`. Each column
+contains the region sequence for the corresponding sequence, and different rows correspond to different
+sequences. **We also include an example of this format in the `data` directory unpacked from `test-data.zip`,
+under `data/inpainting/test_sequences.csv`.**
+
+For structural data, we use a specific HDF5 format. To obtain an HDF5 file for an input directory of PDB files, 
+use our utility script:
+
+```bash
+python scripts/data/pdbs_to_hdf5.py /path/to/pdb/dir --cores 4 -o structures.hdf5
+```
+
+Then, adjust the `model.datamodule.cfg.train_dataset` and `model.datamodule.cfg.val_dataset` fields in the 
+relevant config file. 
+
+There is also a `wandb` field that can be filled in with your project's details.
+
+Then, run training with (e.g. for structure finetuning):
+
+```bash
+python scripts/train.py --config-name train_structures
+```

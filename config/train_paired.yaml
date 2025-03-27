@@ -4,9 +4,9 @@ defaults:
   - _self_
 
 wandb:
-  entity: "sormanni-lab"
-  project: "IgCraft"
-  run_name: "train_paired_bfn"
+  entity: null
+  project: null
+  run_name: null
   tags: null
 
 checkpoint:
