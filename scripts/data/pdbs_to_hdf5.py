@@ -70,7 +70,7 @@ def main():
     pdb_files = [
         Path(args.dir) / p
         for p in os.listdir(args.dir)
-        if p.endswith(".pdb") or p.endswith(".pdb.gz")
+        if p.endswith(".pdb") or p.endswith(".pdb.gz") or p.endswith(".cif") or p.endswith(".cif.gz")
     ]
     with ProcessPoolExecutor(ncpu) as executor:
         antibody_data = executor.map(AntibodyPDBData.from_pdb, pdb_files)
@@ -130,6 +130,8 @@ def main():
     with h5py.File(args.outfile, "w") as file:
         for data in keep_antibodies:
             data.to_hdf5(file)
+
+    logger.info(f"Data saved to {args.outfile}.")
 
 
 if __name__ == "__main__":

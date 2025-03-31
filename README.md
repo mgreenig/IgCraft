@@ -1,5 +1,11 @@
 # IgCraft: A versatile generative model for paired human antibody sequences
 
+![PyTorch](https://img.shields.io/badge/PyTorch-red?logo=pytorch&logoColor=white)
+![Lightning](https://img.shields.io/badge/Lightning-792ee5?logo=lightning&logoColor=white)
+[![arXiv](https://img.shields.io/badge/arXiv-2503.19821-b31b1b)](https://arxiv.org/abs/2503.19821)
+
+![schematic](images/schematic.png)
+
 IgCraft is a human antibody sequence generative model that can perform a both unconditional and conditional sampling
 and flexibly condition on structural data. Specifically we demonstrate that the model achieves competitive performance
 on the following tasks:
