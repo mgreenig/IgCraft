@@ -6,7 +6,7 @@
 
 ![schematic](images/schematic.png)
 
-IgCraft is a human antibody sequence generative model that can perform a both unconditional and conditional sampling
+IgCraft is a human antibody sequence generative model that can perform both unconditional and conditional sampling
 and flexibly condition on structural data. Specifically we demonstrate that the model achieves competitive performance
 on the following tasks:
 
@@ -172,7 +172,7 @@ relevant config file.
 
 There is also a `wandb` field that can be filled in with your project's details.
 
-Then, run training with (e.g. for structure finetuning):
+Then, run training by specifying one of the training configs with `--config-name`, e.g. for structure finetuning:
 
 ```bash
 python scripts/train.py --config-name train_structures
