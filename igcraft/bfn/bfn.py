@@ -12,7 +12,14 @@ from .schedule import BFNAccuracySchedule
 
 
 class DiscreteBFN(nn.Module):
-    """Discrete-variable Bayesian Flow Network."""
+    """
+    Discrete-variable Bayesian Flow Network, implemented as in
+    Graves et al. (2023) (https://arxiv.org/abs/2308.07037).
+
+    Since we use the BFN SDE sampler from https://arxiv.org/abs/2404.15766,
+    the receiver/update distributions are not implemented here (rather they
+    are implemented implicitly through the BFN SDE solver).
+    """
 
     def __init__(
         self,
@@ -36,7 +43,8 @@ class DiscreteBFN(nn.Module):
         self, t_start: float, batch_size: int | None = None
     ) -> torch.Tensor:
         """Initialises the parameters of an uninformed input distribution.
-        If :code:`t_start > 0`, this samples from :math:`N(0, K \\beta(t) I)`.
+        If :code:`t_start > 0`, this samples from :math:`N(0, K \\beta(t) I)` as
+        in https://arxiv.org/abs/2404.15766.
 
         :param t_start: The time at which the generative process starts. For
             :code:`t_start > 0`, the input distribution is sampled from a normal distribution.
@@ -59,8 +67,8 @@ class DiscreteBFN(nn.Module):
         alpha: torch.Tensor,
     ) -> torch.Tensor:
         """
-        Generate a noise sample for the ground-truth (x) from the sender distribution using
-        eq 157 in the BFN paper.
+        Generate a noise sample for the ground-truth (x) from the sender distribution,
+        from Eq. 157 in the BFN paper.
 
         :param x: A tensor of ground-truth categorical data (integers) with shape specified by
             the attribute :code:`variables_shape`.
@@ -83,14 +91,7 @@ class DiscreteBFN(nn.Module):
         x: torch.Tensor,
         beta: torch.Tensor,
     ) -> torch.Tensor:
-        """Sample from the Bayesian flow distribution using the ground-truth discrete data :code:`x`
-        and the accuracy schedule :code:`beta`.
-
-        This is sampled as:
-
-        .. math::
-            y \\sim Normal(y|\\beta(t)(K e_x − 1),\\beta(t)KI) \\newline
-            \\theta = softmax(y)
+        """Sample from the Bayesian flow distribution, from Eq. 185 in the BFN paper.
 
         :param x: The ground-truth discrete data with shape specified by the attribute :code:`variables_shape`.
         :param beta: The beta value at time t.
@@ -113,7 +114,7 @@ class DiscreteBFN(nn.Module):
         samples = torch.multinomial(probs, 1).squeeze(-1)
         return samples.reshape(shape[:-1])
 
-    def logL(
+    def log_likelihood(
         self,
         logits: torch.Tensor,
         x: torch.Tensor,

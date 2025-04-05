@@ -465,7 +465,7 @@ class UnpairedSequenceBFN(SequenceGenerativeModel[torch.Tensor, SequenceTransfor
             with torch.no_grad():
                 logits_1 = self.forward((theta_1, cond_data), t_1)
 
-            recon_loss += -self.bfn.logL(logits_1, x, None)
+            recon_loss += -self.bfn.log_likelihood(logits_1, x, None)
 
         recon_loss /= num_flow_samples
 
@@ -1041,7 +1041,7 @@ class PairedSequenceBFN(
                 )
 
             logits_1 = torch.cat([logits_1_vh, logits_1_vl], dim=-2)
-            recon_loss += -self.bfn.logL(logits_1, x, None)
+            recon_loss += -self.bfn.log_likelihood(logits_1, x, None)
 
         recon_loss /= num_flow_samples
 
