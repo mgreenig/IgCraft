@@ -136,10 +136,10 @@ You can also condition on the structure of the framework regions by passing the 
 To train IgCraft, you can use the `train.py` script. You'll need to specify a `config-name`, which points
 to a YAML file in the `config` directory. We include the following configs for the different stages of training:
 
-- `train_structures.yaml` - Fine-tuning on paired antibody structures in HDF5 format
-- `train_paired.yaml` - Fine-tuning on paired antibody sequences in CSV format
-- `train_unpaired_vh.yaml` - Pre-training on VH sequences in CSV format
-- `train_unpaired_vl.yaml` - Pre-training on VL sequences in CSV format
+- `train_unpaired_vl.yaml`: Pre-training on unpaired VL sequences in CSV format (columns `{region}_aa`)
+- `train_unpaired_vh.yaml`: Pre-training on unpaired VH sequences in CSV format (columns `{region}_aa`)
+- `train_paired.yaml`: Fine-tuning on paired antibody sequences in CSV format (columns `{region}_aa_{chain_type}`)
+- `train_structures.yaml`: Fine-tuning on paired antibody structures in HDF5 format (see below)
 
 To obtain the training data we used, run:
 
@@ -154,11 +154,18 @@ By default, the dataset paths in the config files above point to the relevant pa
 
 You can also use your own data, but it needs to be formatted correctly!
 
-We format sequence datasets as CSV files with columns `{region}_aa_{chain_type}` where `{region}` is the 
+We format paired sequence datasets as CSV files with columns `{region}_aa_{chain_type}` where `{region}` is the 
 variable region (e.g. `fwr1`, `cdr1`, etc.) and `{chain_type}` is either `heavy` or `light`. Each column
 contains the region sequence for the corresponding sequence, and different rows correspond to different
-sequences. **We also include an example of this format in the `data` directory unpacked from `test-data.zip`,
-under `data/inpainting/test_sequences.csv`.**
+sequences. If you have a FASTA file of paired sequences (of the form `{VH sequence}:{VL sequence}`) 
+you want to train on, you can use the `fasta_to_csv.py` script to convert it to the correct format:
+
+```bash
+python scripts/data/fasta_to_csv.py /path/to/my/fasta --cores 4 --outfile train_sequences.csv
+```
+
+We include an example of the target CSV format in the `data` directory unpacked from `test-data.zip`,
+under `data/inpainting/test_sequences.csv`.
 
 For structural data, we use a specific HDF5 format. To obtain an HDF5 file for an input directory of PDB files, 
 use our utility script:
@@ -167,8 +174,8 @@ use our utility script:
 python scripts/data/pdbs_to_hdf5.py /path/to/pdb/dir --cores 4 -o structures.hdf5
 ```
 
-Then, adjust the `model.datamodule.cfg.train_dataset` and `model.datamodule.cfg.val_dataset` fields in the 
-relevant config file. 
+After creating your data files (either CSV of HDF5), adjust the `model.datamodule.cfg.train_dataset` 
+and `model.datamodule.cfg.val_dataset` fields in the relevant config file for training.
 
 There is also a `wandb` field that can be filled in with your project's details.
 

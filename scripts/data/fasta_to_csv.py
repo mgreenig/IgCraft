@@ -30,13 +30,6 @@ def parse_args():
         help="Path to a FASTA file that will be converted into a CSV file.",
     )
     parser.add_argument(
-        "--scheme",
-        "-s",
-        type=str,
-        default="imgt",
-        help="Numbering scheme to use.",
-    )
-    parser.add_argument(
         "--cores",
         type=int,
         default=-1,
@@ -72,7 +65,6 @@ def main():
     logger.info(f"Running ANARCI alignment with {ncpu} cores.")
     with open(args.fasta) as file:
         input_sequences = list(SimpleFastaParser(file))
-        orig_seq_ids = []
         vh_inputs = []
         vl_inputs = []
         for seq_id, sequence in input_sequences:
@@ -124,12 +116,12 @@ def main():
     for i in range(0, len(input_sequences), args.chunksize):
         vh_chunk = vh_inputs[i : i + args.chunksize]
         vh_sequences, vh_numbered_sequences, vh_alignment_details, _ = run_anarci(
-            vh_chunk, scheme=args.scheme, ncpu=ncpu, output=False
+            vh_chunk, scheme="imgt", ncpu=ncpu, output=False
         )
 
         vl_chunk = vl_inputs[i : i + args.chunksize]
         vl_sequences, vl_numbered_sequences, vl_alignment_details, _ = run_anarci(
-            vl_chunk, scheme=args.scheme, ncpu=ncpu, output=False
+            vl_chunk, scheme="imgt", ncpu=ncpu, output=False
         )
 
         logger.info(
