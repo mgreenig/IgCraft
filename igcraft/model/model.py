@@ -1090,8 +1090,7 @@ class PairedSequenceBFN(
         self, batch: tuple[tuple[torch.Tensor, torch.Tensor], PairedStructureData]
     ) -> tuple[PairedStructureData, torch.Tensor]:
         """
-        Masks the structures in the input batch, either "all" (the entire structure is masked)
-        or "fwrs" (only the framework regions are masked).
+        Masks the framework structures in the input batch.
 
         :param batch: The batch to mask, containing VH and VL sequences and structural data.
         :return: The structure conditioning data with the padding masks updated and a boolean
@@ -1278,7 +1277,7 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
         t_start: float = 1e-6,
         temperature: float = 1.0,
         num_particles: int = 32,
-        replace_receiver: bool = True,
+        unmask_cond_probs: bool = True,
     ):
         """
         :param vh_len: The length of the VH chain. Used to infer the length of the VL chain
@@ -1288,9 +1287,9 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
         :param t_start: The starting time in the generative process.
         :param temperature: The temperature to use when sampling from the model.
         :param num_particles: The number of particles to use in SMC conditioning.
-        :param replace_receiver: Whether to replace the predicted probabilities in the receiver distribution
-            with the ground-truth sequence for the conditioning data. This typically guarantees that the model
-            samples sequences that match the conditioning data.
+        :param unmask_cond_probs: Whether to replace the predicted probabilities from the model
+            with the ground-truth sequence one-hot-encoding for the conditioning data. This typically
+            guarantees that the model samples sequences that match the conditioning data.
         """
         self.vh_len = vh_len
         self.num_steps = num_steps
@@ -1298,7 +1297,7 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
         self.t_start = t_start
         self.temperature = temperature
         self.num_particles = num_particles
-        self.replace_receiver = replace_receiver
+        self.unmask_cond_probs = unmask_cond_probs
 
     def _step(
         self,
@@ -1389,7 +1388,7 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
             ]
 
             # Optionally replace the receiver distribution with the conditioning data
-            if self.replace_receiver:
+            if self.unmask_cond_probs:
                 if cond_mask is None:
                     cond_mask = torch.ones(
                         probs.shape[:-1], device=probs.device, dtype=torch.bool
@@ -1414,7 +1413,8 @@ class PairedSequenceBFNSampler(SequenceSampler[PairedSequenceBFN]):
         fix_length: bool = False,
         progress_bar: bool = True,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Generate paired sequence samples via the trained BFN model.
+        """
+        Generate paired sequence samples via the trained BFN model.
 
         :param model: The model to use to generate samples.
         :param num_samples: The number of samples to generate. Only used if :code:`cond_x` is :code:`None`.
