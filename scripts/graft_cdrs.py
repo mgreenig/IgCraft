@@ -145,8 +145,12 @@ def main(cfg: DictConfig) -> None:
         # Condition on the sequence of the CDRs
         fwr_regions = ["fwr1", "fwr2", "fwr3", "fwr4"]
         cond_mask = datamodule.get_imgt_inpaint_mask(
-            seq_data, fwr_regions, batch_size, reveal_pads=cfg.cdr_pad_length > 0
-        )  # only reveal pads if we are padding the CDRs
+            seq_data,
+            fwr_regions,
+            batch_size,
+            reveal_pads=cfg.cdr_pad_length > 0
+            or (cfg.use_cdr_structure and cfg.use_fwr_structure),
+        )  # only reveal pads if we are padding the CDRs or exposing the whole structure
         vh_cond_mask, vl_cond_mask = cond_mask
 
         vh_imgt_idx = datamodule.vh_region_indices
@@ -247,30 +251,63 @@ def main(cfg: DictConfig) -> None:
         true_sequences = datamodule.data_to_sequences(seq_data)
         pred_sequences = datamodule.data_to_sequences(samples)
 
-        for i in range(batch_size):
-            wt_seq = true_sequences[i]
-            pred_seq = pred_sequences[i]
+    # Save the grafted sequences to a CSV file
+    # Save the grafted sequences to CSV/FASTA files
+    sequence_dict = defaultdict(list)
 
-            for region, seq in pred_seq.items():
-                if region not in fwr_regions:
-                    grafted_sequences[f"{region}_pred"].append(seq)
+    for true_seq, pred_seq in zip(true_sequences, pred_sequences):
+        for region, true_region_seq in true_seq.items():
+            sequence_dict[f"{region}_wt"].append(true_region_seq)
 
-            for region, seq in wt_seq.items():
-                grafted_sequences[f"{region}_wt"].append(seq)
+            # If the structure was provided for the region, we are
+            # constrained to match exactly the length of the WT sequence
+            # (to be compatible with the input structure)
+            if ("cdr" in region and cfg.use_cdr_structure) or (
+                "fwr" in region and cfg.use_fwr_structure
+            ):
+                # Pad with the true amino acids if shorter
+                if len(pred_seq[region]) < len(true_region_seq):
+                    pred_seq[region] = (
+                        pred_seq[region] + true_region_seq[len(pred_seq[region]) :]
+                    )
+
+                # Clip the sequence to the length of the WT sequence if longer
+                if len(pred_seq[region]) > len(true_region_seq):
+                    pred_seq[region] = pred_seq[region][: len(true_region_seq)]
+
+            sequence_dict[f"{region}_pred"].append(pred_seq[region])
 
     # Save the grafted sequences to a CSV file
-    grafted_sequence_df = pd.DataFrame(grafted_sequences)
+    grafted_sequence_df = pd.DataFrame(sequence_dict)
     grafted_sequence_df["grafted_vh"] = grafted_sequence_df[
-        ["H-fwr1_pred", "H-cdr1_wt", "H-fwr2_pred", "H-cdr2_wt", "H-fwr3_pred", "H-cdr3_wt", "H-fwr4_pred"]
+        [
+            "H-fwr1_pred",
+            "H-cdr1_wt",
+            "H-fwr2_pred",
+            "H-cdr2_wt",
+            "H-fwr3_pred",
+            "H-cdr3_wt",
+            "H-fwr4_pred",
+        ]
     ].apply(lambda x: "".join(x), axis=1)
     grafted_sequence_df["grafted_vl"] = grafted_sequence_df[
-        ["L-fwr1_pred", "L-cdr1_wt", "L-fwr2_pred", "L-cdr2_wt", "L-fwr3_pred", "L-cdr3_wt", "L-fwr4_pred"]
+        [
+            "L-fwr1_pred",
+            "L-cdr1_wt",
+            "L-fwr2_pred",
+            "L-cdr2_wt",
+            "L-fwr3_pred",
+            "L-cdr3_wt",
+            "L-fwr4_pred",
+        ]
     ].apply(lambda x: "".join(x), axis=1)
     grafted_sequence_df.to_csv(f"{cfg.out_dir}/grafted_sequences.csv", index=False)
 
     # Save the grafted sequences to a FASTA file
     records = []
-    for (pdb_id, vh_id, vl_id), df in grafted_sequence_df.groupby(["pdb_id", "vh_id", "vl_id"]):
+    for (pdb_id, vh_id, vl_id), df in grafted_sequence_df.groupby(
+        ["pdb_id", "vh_id", "vl_id"]
+    ):
         for i, row in df.reset_index().iterrows():
             seq = Seq(f"{row['grafted_vh']}:{row['grafted_vl']}")
             seq_id = f"{pdb_id}_{vh_id}_{vl_id}_{i}"
@@ -280,9 +317,7 @@ def main(cfg: DictConfig) -> None:
     with open(f"{cfg.out_dir}/grafted_sequences.fasta", "w") as f:
         SeqIO.write(records, f, "fasta")
 
-    logger.info(
-        f"Run finished! Saved generated framework sequences to {cfg.out_dir}."
-    )
+    logger.info(f"Run finished! Saved generated framework sequences to {cfg.out_dir}.")
 
 
 if __name__ == "__main__":
