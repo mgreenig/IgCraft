@@ -578,7 +578,7 @@ class UnpairedSequenceBFN(SequenceGenerativeModel[torch.Tensor, SequenceTransfor
 class UnpairedSequenceBFNSampler(SequenceSampler[UnpairedSequenceBFN]):
     """
     A sampler that uses a BFN to generate samples of unpaired data sequences.
-    Conditioning is performed using the score-based method detailed in https://arxiv.org/pdf/2209.14687.
+    Conditioning is performed using the particle filtering method detailed in https://arxiv.org/abs/2206.04119.
     """
 
     def __init__(

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import hydra
 import torch
+from torch.utils.data import Subset
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from loguru import logger
@@ -46,13 +47,23 @@ def main(cfg: DictConfig) -> None:
 
     seed_everything(cfg.seed)
 
-    # Obtain a dataset from the datamodule
-    dataset = datamodule.get_dataset(cfg.sequences_csv)
+    if cfg.n_sequences < 1:
+        raise ValueError("n_sequences must be >= 1.")
+
+    # Obtain a dataset from the datamodule; repeat each CSV row n_sequences times
+    base_dataset = datamodule.get_dataset(cfg.sequences_csv)
+    indices = [
+        i for i in range(len(base_dataset)) for _ in range(cfg.n_sequences)
+    ]
+    dataset = Subset(base_dataset, indices)
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=cfg.batch_size, shuffle=False
     )
 
-    logger.info(f"Inpainting {len(dataset)} VH/VL pairs...")
+    logger.info(
+        f"Inpainting {len(dataset)} VH/VL pairs "
+        f"({len(base_dataset)} inputs × {cfg.n_sequences} samples)..."
+    )
 
     # Instantiate the sampler
     sampler = instantiate(cfg.sampler)
@@ -64,12 +75,20 @@ def main(cfg: DictConfig) -> None:
     ]
 
     inpaint_sequences = []
+    batch_offset = 0
     for batch, batch_size in zip(dataloader, batch_sizes):
         batch = model.transfer_batch_to_device(batch, model.device, 0)
 
         seq_data, _ = batch
         true_sequences = datamodule.data_to_sequences(seq_data)
-        batch_inpaint_sequences = [{"true": seqs} for seqs in true_sequences]
+        batch_inpaint_sequences = [
+            {
+                "csv_row_index": (batch_offset + i) // cfg.n_sequences,
+                "sample_index": (batch_offset + i) % cfg.n_sequences,
+                "true": seqs,
+            }
+            for i, seqs in enumerate(true_sequences)
+        ]
 
         for region in cfg.regions:
 
@@ -100,6 +119,7 @@ def main(cfg: DictConfig) -> None:
                 batch_inpaint_sequences[i][f"{region_key}-inpaint"] = seqs
 
         inpaint_sequences.extend(batch_inpaint_sequences)
+        batch_offset += batch_size
 
     # Write the inpainted IMGT regions to a JSON file
     with open(Path(cfg.out_dir) / "inpaint_sequences.json", "w") as f:

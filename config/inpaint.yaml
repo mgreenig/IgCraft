@@ -25,6 +25,7 @@ regions:
   - [L-fwr1, L-fwr2, L-fwr3, L-fwr4]
 
 batch_size: 32
+n_sequences: 1  # Number of samples to draw per CSV row
 fix_length: true  # Whether to fix the length of the inpainted regions
 progress_bar: false
 seed: 42
